@@ -33,12 +33,12 @@ class PipedriveDeletion
         $builder = new ClassMetadataBuilder($metadata);
         $builder
             ->setTable('plugin_crm_pipedrive_deletions')
-            ->addIndex(['timestamp'], 'timestamp');
+            ->addIndex(['deletion_date'], 'deletion_date');
 
         $builder->addId();
         $builder->addNamedField('objectType', 'string', 'object_type');
-        $builder->addNamedField('timestamp', 'datetime', 'timestamp');
-        $builder->addNamedField('deletedId', 'integer', 'deleted_id');
+        $builder->addNamedField('integrationEntityId', 'integer', 'integration_entity_id');
+        $builder->addNamedField('deletedDate', 'datetime', 'deleted_date');
     }
 
     /**
