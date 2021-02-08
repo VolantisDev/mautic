@@ -62,7 +62,8 @@ class LeadSubscriber implements EventSubscriberInterface
         }
         /** @var PipedriveIntegration $integrationObject */
         $integrationObject = $this->integrationHelper->getIntegrationObject(PipedriveIntegration::INTEGRATION_NAME);
-        if (false === $integrationObject || !$integrationObject->shouldImportDataToPipedrive()) {
+        $operation         = $this->leadExport->getOperation($lead);
+        if (false === $integrationObject || !$integrationObject->shouldImportDataToPipedrive($operation)) {
             return;
         }
         $this->leadExport->setIntegration($integrationObject);
@@ -85,7 +86,7 @@ class LeadSubscriber implements EventSubscriberInterface
 
         /** @var PipedriveIntegration $integrationObject */
         $integrationObject = $this->integrationHelper->getIntegrationObject(PipedriveIntegration::INTEGRATION_NAME);
-        if (false === $integrationObject || !$integrationObject->shouldImportDataToPipedrive()) {
+        if (false === $integrationObject || !$integrationObject->shouldImportDataToPipedrive('update')) {
             return;
         }
         $this->leadExport->setIntegration($integrationObject);
@@ -122,7 +123,7 @@ class LeadSubscriber implements EventSubscriberInterface
 
         /** @var PipedriveIntegration $integrationObject */
         $integrationObject = $this->integrationHelper->getIntegrationObject(PipedriveIntegration::INTEGRATION_NAME);
-        if (false === $integrationObject || !$integrationObject->shouldImportDataToPipedrive()) {
+        if (false === $integrationObject || !$integrationObject->shouldImportDataToPipedrive('update')) {
             return;
         }
         $this->leadExport->setIntegration($integrationObject);
