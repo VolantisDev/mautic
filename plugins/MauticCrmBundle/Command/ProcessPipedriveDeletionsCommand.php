@@ -57,7 +57,7 @@ class ProcessPipedriveDeletionsCommand extends ContainerAwareCommand
         }
 
         $this->em = $container->get('doctrine.orm.default_entity_manager');
-        $query    = $this->em->createQuery('SELECT d FROM MauticPlugin\MauticCrmBundle\Entity\PipedriveDeletion d WHERE d.deleted_date < :olderThan');
+        $query    = $this->em->createQuery('SELECT d FROM MauticPlugin\MauticCrmBundle\Entity\PipedriveDeletion d WHERE d.deletedDate < :olderThan');
         $query->setParameter('olderThan', new \DateTime('-1 minute'));
         $deletions = $query->getResult();
 
