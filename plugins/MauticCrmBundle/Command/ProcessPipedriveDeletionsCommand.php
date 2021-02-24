@@ -17,7 +17,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class ProcessPipedriveDeletions extends ContainerAwareCommand
+class ProcessPipedriveDeletionsCommand extends ContainerAwareCommand
 {
     const PERSON_ENTITY_TYPE       = 'person';
     const LEAD_ENTITY_TYPE         = 'lead';
