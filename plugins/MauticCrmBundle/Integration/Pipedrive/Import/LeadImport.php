@@ -36,8 +36,9 @@ class LeadImport extends AbstractImport
     {
         parent::__construct($em);
 
-        $this->leadModel    = $leadModel;
-        $this->companyModel = $companyModel;
+        $this->leadModel     = $leadModel;
+        $this->companyModel  = $companyModel;
+        $this->contactMerger = $contactMerger;
     }
 
     /**
