@@ -83,7 +83,7 @@ class PipedriveDeletion
      */
     public function setDeletedDate(DateTime $deletedDate)
     {
-        $this->$deletedDate = $deletedDate->getTimestamp();
+        $this->deletedDate = $deletedDate->getTimestamp();
 
         return $this;
     }
