@@ -143,6 +143,7 @@ class CompanyImport extends AbstractImport
                 ->setIntegrationEntityId($integrationEntity->getId());
 
             $this->em->persist($deletion);
+            $this->em->flush();
         } else {
             /** @var Company $company */
             $company = $this->em->getRepository(Company::class)->findOneById($integrationEntity->getInternalEntityId());
