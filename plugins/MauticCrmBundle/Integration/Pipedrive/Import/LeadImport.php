@@ -168,6 +168,7 @@ class LeadImport extends AbstractImport
                 ->setIntegrationEntityId($integrationEntity->getId());
 
             $this->em->persist($deletion);
+            $this->em->flush();
         } else {
             /** @var Lead $lead */
             $lead = $this->em->getRepository(Lead::class)->findOneById($integrationEntity->getInternalEntityId());
