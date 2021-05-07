@@ -168,13 +168,13 @@ class CompanyImport extends AbstractImport
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Exception
      */
-    public function merge(array $data = [], array $otherData = [])
+    public function merge(array $data = [], $otherId = null)
     {
         if (!$this->getIntegration()->isCompanySupportEnabled()) {
             return false; //feature disabled
         }
 
-        $otherIntegrationEntity = $this->getCompanyIntegrationEntity(['integrationEntityId' => $otherData['id']]);
+        $otherIntegrationEntity = $this->getCompanyIntegrationEntity(['integrationEntityId' => $otherId]);
 
         if (!$otherIntegrationEntity) {
             // Only destination entity exists, so handle it as an update.

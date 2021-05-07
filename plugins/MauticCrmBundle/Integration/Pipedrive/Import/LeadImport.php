@@ -195,9 +195,9 @@ class LeadImport extends AbstractImport
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \Exception
      */
-    public function merge(array $data = [], array $otherData = [])
+    public function merge(array $data = [], $otherId = null)
     {
-        $otherIntegrationEntity = $this->getLeadIntegrationEntity(['integrationEntityId' => $otherData['id']]);
+        $otherIntegrationEntity = $this->getLeadIntegrationEntity(['integrationEntityId' => $otherId]);
 
         if (!$otherIntegrationEntity) {
             // Only destination entity exists, so handle it as an update.
