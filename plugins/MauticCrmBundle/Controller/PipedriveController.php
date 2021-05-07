@@ -77,7 +77,7 @@ class PipedriveController extends CommonController
                     break;
                 case self::LEAD_MERGED_EVENT:
                     $leadImport = $this->getLeadImport($pipedriveIntegration);
-                    $leadImport->merge($data, $params['previous']);
+                    $leadImport->merge($data, $data['merge_what_id']);
                     break;
                 case self::COMPANY_UPDATE_EVENT:
                     $companyImport = $this->getCompanyImport($pipedriveIntegration);
@@ -89,7 +89,7 @@ class PipedriveController extends CommonController
                     break;
                 case self::COMPANY_MERGED_EVENT:
                     $companyImport = $this->getCompanyImport($pipedriveIntegration);
-                    $companyImport->merge($data, $params['previous']);
+                    $companyImport->merge($data, $data['merge_what_id']);
                     break;
                 case self::USER_UPDATE_EVENT:
                     $ownerImport = $this->getOwnerImport($pipedriveIntegration);
