@@ -94,7 +94,13 @@ class ProcessPipedriveDeletionsCommand extends ContainerAwareCommand
             /** @var ModelFactory $modelFactory */
             $modelFactory = $container->get('mautic.model.factory');
             /** @var CompanyModel|LeadModel $model */
-            $model = $modelFactory->getModel($type);
+            $modelType = $type;
+
+            if ($modelType === 'company') {
+                $modelType = 'lead.company';
+            }
+
+            $model = $modelFactory->getModel($modelType);
             $model->deleteEntity($entity);
 
             if (!empty($entity->deletedId)) {
