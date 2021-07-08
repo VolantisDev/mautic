@@ -12,7 +12,7 @@
 return [
     'name'        => 'CRM',
     'description' => 'Enables integration with Mautic supported CRMs.',
-    'version'     => '1.0',
+    'version'     => '1.1',
     'author'      => 'Mautic',
     'routes'      => [
         'public' => [
@@ -265,6 +265,7 @@ return [
                     'doctrine.orm.entity_manager',
                     'mautic.lead.model.lead',
                     'mautic.lead.model.company',
+                    'mautic.lead.merger',
                 ],
             ],
             'mautic_integration.pipedrive.export.company' => [

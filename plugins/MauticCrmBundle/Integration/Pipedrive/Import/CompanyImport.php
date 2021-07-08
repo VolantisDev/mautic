@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManager;
 use Mautic\LeadBundle\Entity\Company;
 use Mautic\LeadBundle\Helper\IdentifyCompanyHelper;
 use Mautic\LeadBundle\Model\CompanyModel;
+use MauticPlugin\MauticCrmBundle\Entity\PipedriveDeletion;
 use Symfony\Component\HttpFoundation\Response;
 
 class CompanyImport extends AbstractImport
@@ -131,20 +132,79 @@ class CompanyImport extends AbstractImport
             throw new \Exception('Company doesn\'t have integration', Response::HTTP_NOT_FOUND);
         }
 
-        /** @var Company $company */
-        $company = $this->em->getRepository(Company::class)->findOneById($integrationEntity->getInternalEntityId());
+        $integrationSettings = $this->getIntegration()->getIntegrationSettings();
+        $deleteViaCron       = ($integrationSettings->getIsPublished() && !empty($integrationSettings->getFeatureSettings()['cronDelete']));
 
-        if (!$company) {
-            throw new \Exception('Company doesn\'t exists', Response::HTTP_NOT_FOUND);
+        if ($deleteViaCron) {
+            $deletion = new PipedriveDeletion();
+            $deletion
+                ->setObjectType('company')
+                ->setDeletedDate(new \DateTime())
+                ->setIntegrationEntityId($integrationEntity->getId());
+
+            $this->em->persist($deletion);
+            $this->em->flush();
+        } else {
+            /** @var Company $company */
+            $company = $this->em->getRepository(Company::class)->findOneById($integrationEntity->getInternalEntityId());
+
+            if (!$company) {
+                throw new \Exception('Company doesn\'t exist', Response::HTTP_NOT_FOUND);
+            }
+
+            // prevent listeners from exporting
+            $company->setEventData('pipedrive.webhook', 1);
+            $this->companyModel->deleteEntity($company);
+
+            if (!empty($company->deletedId)) {
+                $this->em->remove($integrationEntity);
+            }
         }
+    }
+
+    /**
+     * @return bool
+     *
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Exception
+     */
+    public function merge(array $data = [], $otherId = null)
+    {
+        if (!$this->getIntegration()->isCompanySupportEnabled()) {
+            return false; //feature disabled
+        }
+
+        $otherIntegrationEntity = $this->getCompanyIntegrationEntity(['integrationEntityId' => $otherId]);
+
+        if (!$otherIntegrationEntity) {
+            // Only destination entity exists, so handle it as an update.
+            return $this->update($data);
+        }
+
+        $integrationEntity = $this->getCompanyIntegrationEntity(['integrationEntityId' => $data['id']]);
+
+        if (!$integrationEntity) {
+            // Destination entity doesn't yet exist, so create it first.
+            $this->create($data);
+            $integrationEntity = $this->getCompanyIntegrationEntity(['integrationEntityId' => $data['id']]);
+        }
+
+        /** @var Company $company */
+        $company = $this->companyModel->getEntity($integrationEntity->getInternalEntityId());
+        /** @var Company $otherCompany */
+        $otherCompany = $this->companyModel->getEntity($otherIntegrationEntity->getInternalEntityId());
 
         // prevent listeners from exporting
         $company->setEventData('pipedrive.webhook', 1);
-        $this->companyModel->deleteEntity($company);
 
-        if (!empty($company->deletedId)) {
-            $this->em->remove($integrationEntity);
-        }
+        $this->companyModel->companyMerge($company, $otherCompany);
+        $this->em->remove($otherIntegrationEntity);
+
+        $integrationEntity->setLastSyncDate(new \DateTime());
+        $this->em->persist($integrationEntity);
+        $this->em->flush();
+
+        return true;
     }
 
     /**

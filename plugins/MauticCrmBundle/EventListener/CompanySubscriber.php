@@ -42,8 +42,9 @@ class CompanySubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            LeadEvents::COMPANY_POST_SAVE  => ['onCompanyPostSave', 0],
-            LeadEvents::COMPANY_PRE_DELETE => ['onCompanyPreDelete', 10],
+            LeadEvents::COMPANY_POST_SAVE    => ['onCompanyPostSave', 0],
+            LeadEvents::COMPANY_PRE_DELETE   => ['onCompanyPreDelete', 10],
+            LeadEvents::COMPANY_POST_MERGE   => ['onCompanyPostMerge', 255],
         ];
     }
 
@@ -60,11 +61,18 @@ class CompanySubscriber implements EventSubscriberInterface
 
         /** @var PipedriveIntegration $integrationObject */
         $integrationObject = $this->integrationHelper->getIntegrationObject(PipedriveIntegration::INTEGRATION_NAME);
-        if (false === $integrationObject || !$integrationObject->shouldImportDataToPipedrive()) {
+
+        if (false === $integrationObject) {
             return;
         }
 
         $this->companyExport->setIntegration($integrationObject);
+        $operation = $this->companyExport->getOperation($company);
+
+        if (!$integrationObject->shouldImportDataToPipedrive($operation)) {
+            return;
+        }
+
         $this->companyExport->pushCompany($company);
     }
 
@@ -81,11 +89,31 @@ class CompanySubscriber implements EventSubscriberInterface
 
         /** @var PipedriveIntegration $integrationObject */
         $integrationObject = $this->integrationHelper->getIntegrationObject(PipedriveIntegration::INTEGRATION_NAME);
-        if (false === $integrationObject || !$integrationObject->shouldImportDataToPipedrive()) {
+        if (false === $integrationObject || !$integrationObject->shouldImportDataToPipedrive('update')) {
             return;
         }
 
         $this->companyExport->setIntegration($integrationObject);
         $this->companyExport->delete($company);
+    }
+
+    public function OnCompanyPostMerge(Events\CompanyMergeEvent $event)
+    {
+        $company = $event->getVictor();
+
+        if ($company->getEventData('pipedrive.webhook')) {
+            return;
+        }
+
+        $otherCompany = $event->getLoser();
+
+        /** @var PipedriveIntegration $integrationObject */
+        $integrationObject = $this->integrationHelper->getIntegrationObject(PipedriveIntegration::INTEGRATION_NAME);
+        if (false === $integrationObject || !$integrationObject->shouldImportDataToPipedrive()) {
+            return;
+        }
+
+        $this->companyExport->setIntegration($integrationObject);
+        $this->companyExport->merge($company, $otherCompany);
     }
 }
